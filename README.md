@@ -15,6 +15,10 @@ docker compose pull && docker compose up -d
 
 Das Image wird per GitHub Actions gebaut: `ghcr.io/t0biii/twitch-badge-check:latest` (amd64 und arm64).
 
+## GitHub Pages
+
+Die Seite läuft auch statisch auf https://t0biii.github.io/twitch-badge-check/ . Eine Action (`pages.yml`) holt alle 30 Minuten die Events und veröffentlicht sie als `events.json`.
+
 ## Lokal testen
 
 ```bash

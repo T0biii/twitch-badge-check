@@ -168,7 +168,7 @@ const r=await fetch('https://gql.twitch.tv/gql',{method:'POST',headers:{'Client-
 body:JSON.stringify({query:'{currentUser{displayName availableBadges{setID version}}}'})});
 const u=(await r.json()).data?.currentUser;
 if(!u)return alert(${JSON.stringify(m.noBadges)});
-window.open('${location.origin}/#d='+encodeURIComponent(JSON.stringify({n:u.displayName,b:u.availableBadges.map(x=>x.setID+'/'+x.version)})))}catch(e){alert(e.message)}})()`.replace(/\n/g,'');
+window.open('${location.origin}${location.pathname}#d='+encodeURIComponent(JSON.stringify({n:u.displayName,b:u.availableBadges.map(x=>x.setID+'/'+x.version)})))}catch(e){alert(e.message)}})()`.replace(/\n/g,'');
 }
 $('bm').onclick=e=>{e.preventDefault();alert(t().bmNote)};
 
@@ -230,7 +230,7 @@ $('miss').onchange=$('view').onchange=$('cost').onchange=render;
 $('lang').onchange=e=>{lang=e.target.value;store.set('lang',lang);applyLang()};
 
 applyLang();
-fetch('/api/events').then(r=>r.json()).then(d=>{events=d;render()})
+fetch('events.json').then(r=>r.json()).then(d=>{events=d;render()})
   .catch(e=>{evError=e.message;render()});
 </script>
 </body>
