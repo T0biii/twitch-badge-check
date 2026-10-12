@@ -1,0 +1,19 @@
+services:
+  twitch-badges:
+    image: ghcr.io/t0biii/twitch-badge-check:latest
+    build: .
+    restart: unless-stopped
+    networks: [traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:-traefik}
+      - traefik.http.routers.twitch-badges.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.twitch-badges.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.twitch-badges.tls=true
+      - traefik.http.routers.twitch-badges.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}
+      - traefik.http.services.twitch-badges.loadbalancer.server.port=3000
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK:-traefik}
+    external: true
