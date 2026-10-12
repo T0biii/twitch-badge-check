@@ -32,6 +32,18 @@
   .sum{font-weight:600;color:var(--fg)}
   footer{margin-top:24px;padding-top:12px;border-top:1px solid var(--card);color:var(--mut);font-size:12px;line-height:1.5}
   footer a{color:var(--acc)}
+  .btn.sec{background:transparent;border:1px solid var(--mut);color:var(--fg)}
+  #cb{position:fixed;left:12px;right:12px;bottom:12px;max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--mut);
+      border-radius:10px;padding:14px;box-shadow:0 4px 24px #0006;z-index:10}
+  #cb[hidden]{display:none}
+  #cb p{margin:0 0 10px;font-size:14px}
+  #cb a{color:var(--acc)}
+  .cbbtns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  dialog{max-width:640px;width:calc(100% - 32px);background:var(--card);color:var(--fg);border:1px solid var(--mut);border-radius:10px;
+         max-height:85vh;overflow:auto;font-size:14px;line-height:1.5}
+  dialog::backdrop{background:#0009}
+  dialog h2{margin-top:0;font-size:18px} dialog h3{font-size:14px;margin:14px 0 2px}
+  dialog p{margin:0 0 6px;color:var(--mut)}
   details{background:var(--card);border-radius:8px;padding:12px;margin-bottom:16px;color:var(--mut)}
   summary{cursor:pointer;color:var(--fg)}
   ol{padding-left:20px} code,textarea{font-size:12px}
@@ -83,14 +95,38 @@
   </details>
   <p id="msg"></p>
   <div id="out"></div>
-  <footer data-i18n-html="footer"></footer>
+  <footer>
+    <span data-i18n-html="footer"></span>
+    <p><a href="#" id="openPriv" data-i18n="privLink"></a> · <a href="#" id="openCb" data-i18n="cbSettings"></a></p>
+  </footer>
 </main>
+<div id="cb" role="dialog" aria-live="polite" hidden>
+  <p><span data-i18n="cbText"></span> <a href="#" class="openPriv" data-i18n="privLink"></a></p>
+  <div class="cbbtns">
+    <button class="btn sec" id="cbNo" data-i18n="cbDecline"></button>
+    <button class="btn" id="cbYes" data-i18n="cbAccept"></button>
+  </div>
+</div>
+<dialog id="priv">
+  <h2 data-i18n="privTitle"></h2>
+  <div data-i18n-html="privBody"></div>
+  <button class="btn" id="privClose" data-i18n="close"></button>
+</dialog>
 <script>
 const SD='<a href="https://www.streamdatabase.com/events" target="_blank" rel="noopener">StreamDatabase</a>';
 const I18N={
  de:{loc:'de-DE',title:'Twitch Badge Check',language:'Sprache',onlyMissing:'nur fehlende',display:'Anzeige',
   viewNow:'Aktuelle',viewUp:'Nur kommende',viewAll:'Aktuelle + kommende',
   type:'Art',costAll:'Alle',costFree:'Gratis (Watchtime)',costPaid:'Bezahlt (Subs, Tickets)',
+  privLink:'Datenschutz',cbSettings:'Cookie-Einstellungen',close:'Schließen',cbAccept:'Speichern erlauben',cbDecline:'Ablehnen',
+  cbText:'Diese Seite kann deine Badge-Liste, deinen Anzeigenamen und deine Sprache lokal in deinem Browser speichern, damit sie nach dem Neuladen noch da sind. Es gibt keine Tracker, keine Analyse und keine Werbung. Ohne Zustimmung wird nichts gespeichert.',
+  privTitle:'Datenschutz',
+  privBody:`<h3>Kurz gesagt</h3><p>Es gibt keine Tracker, keine Analyse-Dienste und keine Werbe-Cookies. Es gibt keinen Benutzerbereich und kein Konto bei uns.</p>
+<h3>Hosting (GitHub Pages)</h3><p>Die Seite wird auf GitHub Pages gehostet (GitHub, Inc., USA). Beim Aufruf verarbeitet GitHub technisch bedingt Daten wie deine IP-Adresse in Server-Logs. Darauf haben wir keinen Einfluss und erhalten diese Daten nicht. Siehe <a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub-Datenschutzerklärung</a>.</p>
+<h3>Externe Inhalte (Twitch)</h3><p>Die Badge-Bilder werden von Twitchs CDN (static-cdn.jtvnw.net) geladen. Dabei erhält Twitch deine IP-Adresse.</p>
+<h3>Lokale Speicherung (nur mit deiner Zustimmung)</h3><p>Im Browser-Speicher (localStorage) deines Geräts: deine Badge-Liste, dein Twitch-Anzeigename, die gewählte Sprache und deine Cookie-Entscheidung. Diese Daten verlassen dein Gerät nicht und werden nicht an uns übertragen. Ohne Zustimmung wird nichts gespeichert, die Seite merkt sich Daten dann nur bis zum Neuladen. Du kannst jederzeit über „Cookie-Einstellungen“ ablehnen (dann wird alles gelöscht) oder die Browserdaten löschen.</p>
+<h3>„Badges holen“ (Lesezeichen)</h3><p>Das Lesezeichen läuft nur auf twitch.tv in deinem Browser. Es nutzt dort deine Anmeldung, um bei Twitch (gql.twitch.tv) deine Badges abzufragen. Dein Login-Token verlässt Twitch nicht. Die Badge-Liste und dein Anzeigename werden im <code>#</code>-Teil der URL an diese Seite übergeben, der von deinem Browser nie an einen Server gesendet wird.</p>
+<h3>Hinweis</h3><p>Diese Seite ist nicht mit Twitch oder StreamDatabase verbunden.</p>`,
   howTitle:'Meine Badges von Twitch laden',how1:'Diesen Button in die Lesezeichenleiste ziehen:',bmName:'Badges holen',
   how2:'twitch.tv öffnen (eingeloggt sein) und das Lesezeichen anklicken.',how3:'Du landest hier zurück, deine Badges sind gespeichert.',
   privacy:'Der Code läuft nur auf twitch.tv in deinem Browser. Dein Login verlässt Twitch nicht, hierher wird nur die Badge-Liste übergeben (im <code>#</code>-Teil der URL, der nie an den Server geht).',
@@ -105,6 +141,15 @@ const I18N={
  en:{loc:'en-GB',title:'Twitch Badge Check',language:'Language',onlyMissing:'only missing',display:'Show',
   viewNow:'Current',viewUp:'Upcoming only',viewAll:'Current + upcoming',
   type:'Type',costAll:'All',costFree:'Free (watch time)',costPaid:'Paid (subs, tickets)',
+  privLink:'Privacy',cbSettings:'Cookie settings',close:'Close',cbAccept:'Allow storage',cbDecline:'Decline',
+  cbText:'This site can store your badge list, display name and language locally in your browser so they are still there after a reload. There are no trackers, no analytics and no ads. Nothing is stored without your consent.',
+  privTitle:'Privacy',
+  privBody:`<h3>In short</h3><p>No trackers, no analytics, no advertising cookies. There is no user area and no account with us.</p>
+<h3>Hosting (GitHub Pages)</h3><p>This site is hosted on GitHub Pages (GitHub, Inc., USA). When you visit, GitHub processes technical data such as your IP address in server logs. We have no influence over this and do not receive that data. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">GitHub Privacy Statement</a>.</p>
+<h3>External content (Twitch)</h3><p>Badge images are loaded from Twitch’s CDN (static-cdn.jtvnw.net). Twitch therefore receives your IP address.</p>
+<h3>Local storage (only with your consent)</h3><p>In your device’s browser storage (localStorage): your badge list, your Twitch display name, the chosen language and your cookie choice. This data never leaves your device and is not sent to us. Without consent nothing is stored; the site then only remembers data until you reload. You can decline at any time via “Cookie settings” (everything is then deleted) or clear your browser data.</p>
+<h3>“Get badges” (bookmark)</h3><p>The bookmark only runs on twitch.tv in your browser. It uses your login there to ask Twitch (gql.twitch.tv) for your badges. Your login token never leaves Twitch. The badge list and display name are passed to this site in the <code>#</code> part of the URL, which your browser never sends to a server.</p>
+<h3>Note</h3><p>This site is not affiliated with Twitch or StreamDatabase.</p>`,
   howTitle:'Load my badges from Twitch',how1:'Drag this button to your bookmarks bar:',bmName:'Get badges',
   how2:'Open twitch.tv (while logged in) and click the bookmark.',how3:'You will land back here and your badges are saved.',
   privacy:'The code only runs on twitch.tv in your browser. Your login never leaves Twitch; only the badge list is passed here (in the <code>#</code> part of the URL, which is never sent to the server).',
@@ -119,6 +164,15 @@ const I18N={
  fr:{loc:'fr-FR',title:'Twitch Badge Check',language:'Langue',onlyMissing:'seulement manquants',display:'Affichage',
   viewNow:'En cours',viewUp:'À venir uniquement',viewAll:'En cours + à venir',
   type:'Type',costAll:'Tous',costFree:'Gratuit (temps de visionnage)',costPaid:'Payant (abonnements, billets)',
+  privLink:'Confidentialité',cbSettings:'Paramètres des cookies',close:'Fermer',cbAccept:'Autoriser le stockage',cbDecline:'Refuser',
+  cbText:'Ce site peut enregistrer localement dans votre navigateur votre liste de badges, votre nom d’affichage et votre langue, afin de les retrouver après un rechargement. Il n’y a ni traceurs, ni analyse, ni publicité. Rien n’est enregistré sans votre accord.',
+  privTitle:'Confidentialité',
+  privBody:`<h3>En bref</h3><p>Pas de traceurs, pas d’analyse, pas de cookies publicitaires. Il n’y a ni espace utilisateur ni compte chez nous.</p>
+<h3>Hébergement (GitHub Pages)</h3><p>Le site est hébergé sur GitHub Pages (GitHub, Inc., États-Unis). Lors de la visite, GitHub traite des données techniques comme votre adresse IP dans ses journaux serveur. Nous n’avons aucune influence dessus et ne recevons pas ces données. Voir la <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">déclaration de confidentialité de GitHub</a>.</p>
+<h3>Contenus externes (Twitch)</h3><p>Les images des badges sont chargées depuis le CDN de Twitch (static-cdn.jtvnw.net). Twitch reçoit donc votre adresse IP.</p>
+<h3>Stockage local (uniquement avec votre accord)</h3><p>Dans le stockage du navigateur (localStorage) de votre appareil : votre liste de badges, votre nom d’affichage Twitch, la langue choisie et votre choix concernant les cookies. Ces données ne quittent pas votre appareil et ne nous sont pas transmises. Sans accord, rien n’est enregistré ; le site ne retient alors les données que jusqu’au rechargement. Vous pouvez refuser à tout moment via « Paramètres des cookies » (tout est alors supprimé) ou effacer les données du navigateur.</p>
+<h3>« Récupérer les badges » (favori)</h3><p>Le favori ne s’exécute que sur twitch.tv dans votre navigateur. Il utilise votre connexion pour demander vos badges à Twitch (gql.twitch.tv). Votre jeton de connexion ne quitte pas Twitch. La liste des badges et le nom d’affichage sont transmis à ce site dans la partie <code>#</code> de l’URL, que votre navigateur n’envoie jamais à un serveur.</p>
+<h3>Remarque</h3><p>Ce site n’est pas affilié à Twitch ni à StreamDatabase.</p>`,
   howTitle:'Charger mes badges depuis Twitch',how1:'Faites glisser ce bouton dans votre barre de favoris :',bmName:'Récupérer les badges',
   how2:'Ouvrez twitch.tv (connecté) et cliquez sur le favori.',how3:'Vous revenez ici et vos badges sont enregistrés.',
   privacy:'Le code ne s’exécute que sur twitch.tv dans votre navigateur. Votre connexion ne quitte pas Twitch ; seule la liste des badges est transmise ici (dans la partie <code>#</code> de l’URL, jamais envoyée au serveur).',
@@ -133,6 +187,15 @@ const I18N={
  es:{loc:'es-ES',title:'Twitch Badge Check',language:'Idioma',onlyMissing:'solo faltantes',display:'Mostrar',
   viewNow:'Actuales',viewUp:'Solo próximas',viewAll:'Actuales + próximas',
   type:'Tipo',costAll:'Todas',costFree:'Gratis (tiempo de visionado)',costPaid:'De pago (suscripciones, entradas)',
+  privLink:'Privacidad',cbSettings:'Ajustes de cookies',close:'Cerrar',cbAccept:'Permitir almacenamiento',cbDecline:'Rechazar',
+  cbText:'Este sitio puede guardar localmente en tu navegador tu lista de insignias, tu nombre visible y tu idioma para que sigan ahí tras recargar. No hay rastreadores, ni analítica ni publicidad. Sin tu consentimiento no se guarda nada.',
+  privTitle:'Privacidad',
+  privBody:`<h3>En resumen</h3><p>Sin rastreadores, sin analítica, sin cookies publicitarias. No hay área de usuario ni cuenta con nosotros.</p>
+<h3>Alojamiento (GitHub Pages)</h3><p>El sitio está alojado en GitHub Pages (GitHub, Inc., EE. UU.). Al visitarlo, GitHub trata datos técnicos como tu dirección IP en sus registros del servidor. No tenemos influencia sobre ello ni recibimos esos datos. Consulta la <a href="https://docs.github.com/es/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">declaración de privacidad de GitHub</a>.</p>
+<h3>Contenido externo (Twitch)</h3><p>Las imágenes de las insignias se cargan desde la CDN de Twitch (static-cdn.jtvnw.net). Por ello Twitch recibe tu dirección IP.</p>
+<h3>Almacenamiento local (solo con tu consentimiento)</h3><p>En el almacenamiento del navegador (localStorage) de tu dispositivo: tu lista de insignias, tu nombre visible de Twitch, el idioma elegido y tu decisión sobre las cookies. Estos datos no salen de tu dispositivo ni se nos envían. Sin consentimiento no se guarda nada; el sitio solo recuerda los datos hasta que recargues. Puedes rechazar en cualquier momento en «Ajustes de cookies» (se borra todo) o borrar los datos del navegador.</p>
+<h3>«Obtener insignias» (marcador)</h3><p>El marcador solo se ejecuta en twitch.tv en tu navegador. Usa tu sesión allí para pedir tus insignias a Twitch (gql.twitch.tv). Tu token de sesión no sale de Twitch. La lista de insignias y el nombre visible se pasan a este sitio en la parte <code>#</code> de la URL, que tu navegador nunca envía a un servidor.</p>
+<h3>Aviso</h3><p>Este sitio no está afiliado a Twitch ni a StreamDatabase.</p>`,
   howTitle:'Cargar mis insignias de Twitch',how1:'Arrastra este botón a tu barra de marcadores:',bmName:'Obtener insignias',
   how2:'Abre twitch.tv (con sesión iniciada) y haz clic en el marcador.',how3:'Volverás aquí y tus insignias quedarán guardadas.',
   privacy:'El código solo se ejecuta en twitch.tv en tu navegador. Tu sesión no sale de Twitch; aquí solo se pasa la lista de insignias (en la parte <code>#</code> de la URL, que nunca se envía al servidor).',
@@ -149,8 +212,11 @@ const I18N={
 const $=id=>document.getElementById(id);
 const parse=(d,t)=>new Date(`${d}T${t||'00:00'}:00Z`);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
-             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+// Speichern im Browser nur mit Zustimmung ('consent' = 'yes' | 'no' | nicht gesetzt)
+let consent=null;try{consent=localStorage.getItem('consent')}catch{}
+const KEYS=['owned','name','imported','lang'];
+const store={get(k){if(consent!=='yes')return null;try{return JSON.parse(localStorage.getItem(k))}catch{return null}},
+             set(k,v){if(consent!=='yes')return;try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
 let events=[],owned=new Set(store.get('owned')||[]),name=store.get('name')||'';
 let imported=!!store.get('imported'),evError=null;
 
@@ -228,6 +294,25 @@ function render(){
 $('out').onclick=e=>{const k=e.target.dataset?.k;if(!k)return;owned.has(k)?owned.delete(k):owned.add(k);save();render()};
 $('miss').onchange=$('view').onchange=$('cost').onchange=render;
 $('lang').onchange=e=>{lang=e.target.value;store.set('lang',lang);applyLang()};
+
+function setConsent(v){
+  consent=v;
+  try{localStorage.setItem('consent',v)}catch{}
+  if(v==='yes'){ // bisher nur im Speicher gehaltene Daten jetzt ablegen
+    store.set('owned',[...owned]);store.set('name',name);store.set('imported',imported);store.set('lang',lang);
+  }else{
+    try{KEYS.forEach(k=>localStorage.removeItem(k))}catch{}
+  }
+  $('cb').hidden=true;
+}
+$('cbYes').onclick=()=>setConsent('yes');
+$('cbNo').onclick=()=>setConsent('no');
+$('openCb').onclick=e=>{e.preventDefault();$('cb').hidden=false};
+const openPriv=e=>{e.preventDefault();$('priv').showModal()};
+$('openPriv').onclick=openPriv;
+document.querySelectorAll('.openPriv').forEach(a=>a.onclick=openPriv);
+$('privClose').onclick=()=>$('priv').close();
+$('cb').hidden=consent==='yes'||consent==='no';
 
 applyLang();
 fetch('events.json').then(r=>r.json()).then(d=>{events=d;render()})
