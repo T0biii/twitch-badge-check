@@ -13,8 +13,9 @@
   header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
   h1{font-size:22px;margin:0}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-  .bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:var(--card);padding:12px;border-radius:8px;margin-bottom:16px}
-  .bar .sp{flex:1}
+  .bar{display:flex;flex-direction:column;gap:10px;background:var(--card);padding:12px;border-radius:8px;margin-bottom:16px}
+  .filters{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center}
+  .filters label{white-space:nowrap}
   .btn{padding:8px 14px;border:0;border-radius:6px;background:var(--acc);color:#fff;cursor:pointer;text-decoration:none;font:inherit}
   label{color:var(--mut);font-size:13px;display:flex;gap:4px;align-items:center}
   select{background:var(--card);color:var(--fg);border:1px solid var(--mut);border-radius:6px;padding:4px 6px;font:inherit}
@@ -64,7 +65,8 @@
     </label>
   </header>
   <div class="bar">
-    <span id="who"></span><span class="sp"></span>
+    <span id="who"></span>
+    <div class="filters">
     <label><input type="checkbox" id="miss" checked> <span data-i18n="onlyMissing"></span></label>
     <label><span data-i18n="display"></span>
       <select id="view">
@@ -80,6 +82,7 @@
         <option value="paid" data-i18n="costPaid"></option>
       </select>
     </label>
+    </div>
   </div>
   <details id="how">
     <summary data-i18n="howTitle"></summary>
