@@ -137,7 +137,7 @@ const I18N={
   manualAlt:'Oder ohne alles: in der Liste unten auf „fehlt/vorhanden“ klicken, um Badges von Hand zu markieren.',
   who:n=>`Badges von <b>${n}</b> geladen`,whoNone:'Noch keine Badges geladen (manuelles Markieren möglich)',
   have:'✓ vorhanden',miss:'✗ fehlt',until:d=>`läuft bis ${d}`,unknown:'unbekannt',starts:d=>`startet ${d}`,
-  nothing:'Nichts anzuzeigen.',summary:(h,t)=>`${h} von ${t} Badges vorhanden, ${t-h} fehlen.`,
+  nothing:'Nichts anzuzeigen.',tbd:'Zeitraum noch unbekannt',summary:(h,t)=>`${h} von ${t} Badges vorhanden, ${t-h} fehlen.`,
   evErr:m=>`Events konnten nicht geladen werden: ${m}`,
   bmNote:'Nicht klicken, sondern in die Lesezeichenleiste ziehen.',notLogged:'Bei twitch.tv nicht angemeldet',noBadges:'Twitch hat keine Badges geliefert',
   footer:`Die Badge-Events stammen von ${SD}, der Besitz deiner Badges wird über Twitchs inoffizielle GraphQL-Schnittstelle (gql.twitch.tv) abgefragt. Diese Seite ist nicht mit Twitch Interactive, Inc. oder StreamDatabase verbunden, von ihnen unterstützt oder betrieben. Twitch und die Badges sind Marken bzw. Eigentum der jeweiligen Inhaber. Angaben ohne Gewähr.`},
@@ -160,7 +160,7 @@ const I18N={
   manualAlt:'Or without any of that: click “missing/owned” in the list below to mark badges by hand.',
   who:n=>`Badges of <b>${n}</b> loaded`,whoNone:'No badges loaded yet (manual marking possible)',
   have:'✓ owned',miss:'✗ missing',until:d=>`runs until ${d}`,unknown:'unknown',starts:d=>`starts ${d}`,
-  nothing:'Nothing to show.',summary:(h,t)=>`${h} of ${t} badges owned, ${t-h} missing.`,
+  nothing:'Nothing to show.',tbd:'Dates not announced yet',summary:(h,t)=>`${h} of ${t} badges owned, ${t-h} missing.`,
   evErr:m=>`Could not load events: ${m}`,
   bmNote:'Don’t click it, drag it to your bookmarks bar.',notLogged:'Not logged in to twitch.tv',noBadges:'Twitch returned no badges',
   footer:`Badge events come from ${SD}; your badge ownership is read via Twitch’s unofficial GraphQL interface (gql.twitch.tv). This site is not affiliated with, endorsed by or operated by Twitch Interactive, Inc. or StreamDatabase. Twitch and the badges are trademarks or property of their respective owners. No guarantee of accuracy.`},
@@ -183,7 +183,7 @@ const I18N={
   manualAlt:'Ou sans rien de tout cela : cliquez sur « manquant/possédé » dans la liste ci-dessous pour marquer les badges à la main.',
   who:n=>`Badges de <b>${n}</b> chargés`,whoNone:'Aucun badge chargé (marquage manuel possible)',
   have:'✓ possédé',miss:'✗ manquant',until:d=>`jusqu’au ${d}`,unknown:'inconnu',starts:d=>`début le ${d}`,
-  nothing:'Rien à afficher.',summary:(h,t)=>`${h} badges sur ${t} possédés, ${t-h} manquants.`,
+  nothing:'Rien à afficher.',tbd:'Dates pas encore annoncées',summary:(h,t)=>`${h} badges sur ${t} possédés, ${t-h} manquants.`,
   evErr:m=>`Impossible de charger les événements : ${m}`,
   bmNote:'Ne cliquez pas, faites-le glisser dans la barre de favoris.',notLogged:'Non connecté à twitch.tv',noBadges:'Twitch n’a renvoyé aucun badge',
   footer:`Les événements de badges proviennent de ${SD} ; la possession de vos badges est lue via l’interface GraphQL non officielle de Twitch (gql.twitch.tv). Ce site n’est ni affilié à, ni soutenu, ni exploité par Twitch Interactive, Inc. ou StreamDatabase. Twitch et les badges sont des marques ou la propriété de leurs détenteurs respectifs. Sans garantie.`},
@@ -206,7 +206,7 @@ const I18N={
   manualAlt:'O sin nada de eso: haz clic en «falta/tienes» en la lista de abajo para marcar las insignias a mano.',
   who:n=>`Insignias de <b>${n}</b> cargadas`,whoNone:'Aún no hay insignias cargadas (marcado manual posible)',
   have:'✓ tienes',miss:'✗ falta',until:d=>`hasta el ${d}`,unknown:'desconocido',starts:d=>`empieza el ${d}`,
-  nothing:'Nada que mostrar.',summary:(h,t)=>`${h} de ${t} insignias conseguidas, faltan ${t-h}.`,
+  nothing:'Nada que mostrar.',tbd:'Fechas aún sin anunciar',summary:(h,t)=>`${h} de ${t} insignias conseguidas, faltan ${t-h}.`,
   evErr:m=>`No se pudieron cargar los eventos: ${m}`,
   bmNote:'No hagas clic, arrástralo a la barra de marcadores.',notLogged:'No has iniciado sesión en twitch.tv',noBadges:'Twitch no devolvió insignias',
   footer:`Los eventos de insignias provienen de ${SD}; la posesión de tus insignias se consulta mediante la interfaz GraphQL no oficial de Twitch (gql.twitch.tv). Este sitio no está afiliado, respaldado ni operado por Twitch Interactive, Inc. ni StreamDatabase. Twitch y las insignias son marcas o propiedad de sus respectivos dueños. Sin garantía.`},
@@ -274,9 +274,9 @@ function render(){
   $('who').innerHTML=imported?m.who(esc(name)):m.whoNone;
   if(evError){$('msg').textContent=m.evErr(evError);$('msg').className='err';return}
   $('msg').className='';
-  const list=events.map(e=>({e,s:parse(e.start_at_date,e.start_at_time),f:e.end_at_date?parse(e.end_at_date,e.end_at_time):null}))
+  const list=events.map(e=>({e,s:e.start_at_date?parse(e.start_at_date,e.start_at_time):null,f:e.end_at_date?parse(e.end_at_date,e.end_at_time):null}))
     .filter(x=>{
-      const current=x.s<=now&&(!x.f||x.f>=now),upcoming=x.s>now;
+      const live=!x.f||x.f>=now,current=x.s&&x.s<=now&&live,upcoming=live&&(!x.s||x.s>now); // ohne Startdatum: zeitlich unbekannt, gilt als kommend
       return view==='up'?upcoming:view==='all'?current||upcoming:current;
     })
     .sort((a,b)=>(a.f||1e15)-(b.f||1e15));
@@ -290,7 +290,7 @@ function render(){
         <div class="d">${esc(b.description)}</div></div>
         <span class="tag ${has?'have':'miss'}" data-k="${esc(k)}">${has?m.have:m.miss}</span></div>`}).join('');
     if(!rows) return '';
-    const when=s<=now?m.until(f?fmt(f):m.unknown):m.starts(fmt(s));
+    const when=!s?m.tbd:s<=now?m.until(f?fmt(f):m.unknown):m.starts(fmt(s));
     return `<div class="ev"><h2>${esc(e.title)}</h2><small>${when}</small>${rows}</div>`}).join('')||`<p>${m.nothing}</p>`;
   $('msg').innerHTML=`<span class="sum">${m.summary(have,total)}</span>`;
 }
