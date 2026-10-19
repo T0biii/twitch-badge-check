@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/build-pages.js
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
       - id: deployment
